@@ -60,7 +60,7 @@ find_path (QT_DIR Qt5
 # Log / Error
 #
 if (NOT QT_DIR)
-	message (FATAL_ERROR "Couldn't find Qt. Use QT_DIR variable to point to a valid Qt install.")
+	message (FATAL_ERROR "Couldn't find Qt. Use QT_ROOT variable to point to a valid Qt install.")
 else ()
 	message (STATUS "Found Qt in '${QT_DIR}'")
 endif ()
