@@ -33,3 +33,10 @@ target_link_libraries (MyAwesomeQtTool PRIVATE Qt::Widgets)
 
 For more information, check the beginning of the script. But basically even on Windows with a
 static Qt library, this should work out of the box.
+
+### Utils.cmake
+
+Various helpers for ease of development. For each function, check the comment preceding in
+the CMake script for more information.
+
+- target_set_app_icon : Set an icon to the executable file. Windows only.
