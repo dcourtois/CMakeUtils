@@ -128,10 +128,18 @@ if (QT_STATIC)
 				Dwmapi.lib
 				Imm32.lib
 				Wtsapi32.lib
+		)
 
-				# The following is needed if you want to use the Windows vista style plugin.
-				# If you provide your own style or CSS, you can comment out the following libs.
-				${QT_PLUGIN_DIR}/styles/qwindowsvistastyle.lib
+	endif ()
+
+	#
+	# Qt5::QWindowsVistaStylePlugin
+	#
+	if (TARGET Qt5::QWindowsVistaStylePlugin)
+
+		target_link_libraries(Qt5::QWindowsVistaStylePlugin
+			INTERFACE
+				# Windows libs
 				UxTheme.lib
 		)
 
