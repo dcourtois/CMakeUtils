@@ -208,7 +208,7 @@ endif ()
 #
 # The qt_install function does just that.
 #
-if (NOT QT_STATIC)
+if (WIN32 AND NOT QT_STATIC)
 
 	function (qt_install TARGET QMLDIR)
 
