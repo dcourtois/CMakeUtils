@@ -20,6 +20,9 @@ function (target_set_app_icon TARGET ICON)
 		# the rc filename
 		set (RC_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}Icon.rc")
 
+		# convert the icon path to absolute
+		get_filename_component (ICON ${ICON} ABSOLUTE)
+
 		# write the rc file
 		file (WRITE
 			${RC_FILENAME}
