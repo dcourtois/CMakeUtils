@@ -99,9 +99,6 @@ if (QT_STATIC)
 
 	#
 	# Qt5::QWindowsIntegrationPlugin
-	# note that this target somehow is already there even if we didn't search for it in the
-	# find_package command. And since it's mandatory to run the most basic Widgets application
-	# on Windows ...
 	#
 	if (TARGET Qt5::QWindowsIntegrationPlugin)
 
@@ -133,6 +130,33 @@ if (QT_STATIC)
 	endif ()
 
 	#
+	# Qt5::QXcbGlxIntegrationPlugin
+	#
+	if (TARGET Qt5::QXcbGlxIntegrationPlugin)
+
+		# find additional components needed by the linux platform plugin
+		find_package (Qt5 5
+			COMPONENTS
+				GlxSupport
+				XcbQpa
+			REQUIRED
+		)
+
+		# configure direct dependencies of the plugin
+		target_link_libraries(Qt5::QXcbGlxIntegrationPlugin
+			INTERFACE
+				# Qt targets
+				Qt5::XcbQpa
+				Qt5::GlxSupport
+				Qt5::QXcbIntegrationPlugin
+
+				# System libs
+				xcb-glx
+		)
+
+	endif ()
+
+	#
 	# Qt5::QWindowsVistaStylePlugin
 	#
 	if (TARGET Qt5::QWindowsVistaStylePlugin)
@@ -153,7 +177,7 @@ if (QT_STATIC)
 		target_link_libraries(Qt5::FontDatabaseSupport
 			INTERFACE
 				# Qt libs
-				${QT_LIB_DIR}/qtfreetype.lib
+				$<$<PLATFORM_ID:Windows>:${QT_LIB_DIR}/qtfreetype.lib>
 		)
 
 	endif ()
@@ -166,11 +190,12 @@ if (QT_STATIC)
 		target_link_libraries(Qt5::Gui
 			INTERFACE
 				# Qt targets
-				Qt5::QWindowsIntegrationPlugin
+				$<$<PLATFORM_ID:Windows>:Qt5::QWindowsIntegrationPlugin>
+				$<$<PLATFORM_ID:Linux>:Qt5::QXcbGlxIntegrationPlugin>
 
 				# Qt libs
-				${QT_LIB_DIR}/qtharfbuzz.lib
-				${QT_LIB_DIR}/qtlibpng.lib
+				$<$<PLATFORM_ID:Windows>:${QT_LIB_DIR}/qtharfbuzz.lib>
+				$<$<PLATFORM_ID:Windows>:${QT_LIB_DIR}/qtlibpng.lib>
 		)
 
 	endif ()
@@ -183,14 +208,14 @@ if (QT_STATIC)
 		target_link_libraries(Qt5::Core
 			INTERFACE
 				# Qt libs
-				${QT_LIB_DIR}/qtpcre2.lib
+				$<$<PLATFORM_ID:Windows>:${QT_LIB_DIR}/qtpcre2.lib>
 
 				# Windows libs
-				Netapi32.lib
-				Ws2_32.lib
-				UserEnv.lib
-				Version.lib
-				Winmm.lib
+				$<$<PLATFORM_ID:Windows>:Netapi32.lib>
+				$<$<PLATFORM_ID:Windows>:Ws2_32.lib>
+				$<$<PLATFORM_ID:Windows>:UserEnv.lib>
+				$<$<PLATFORM_ID:Windows>:Version.lib>
+				$<$<PLATFORM_ID:Windows>:Winmm.lib>
 		)
 
 		target_compile_definitions (Qt5::Core
@@ -202,7 +227,31 @@ if (QT_STATIC)
 				$<$<CONFIG:Release>:QT_NO_WARNING_OUTPUT>
 
 				# Since Qt was built in release, we need to match it on Windows
-				_ITERATOR_DEBUG_LEVEL=0
+				$<$<PLATFORM_ID:Windows>:_ITERATOR_DEBUG_LEVEL=0>
+		)
+
+	endif ()
+
+	#
+	# Jpeg plugin
+	#
+	if (TARGET Qt5::QJpegPlugin)
+
+		target_link_libraries(Qt5::QJpegPlugin
+			INTERFACE
+				$<$<PLATFORM_ID:Linux>:-ljpeg>
+		)
+
+	endif ()
+
+	#
+	# Tiff plugin
+	#
+	if (TARGET Qt5::QTiffPlugin)
+
+		target_link_libraries(Qt5::QTiffPlugin
+			INTERFACE
+				$<$<PLATFORM_ID:Linux>:-ltiff>
 		)
 
 	endif ()
