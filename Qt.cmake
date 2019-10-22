@@ -163,8 +163,24 @@ if (QT_STATIC)
 
 		target_link_libraries(Qt5::QWindowsVistaStylePlugin
 			INTERFACE
-				# Windows libs
+				# System libs
 				UxTheme.lib
+		)
+
+	endif ()
+
+	#
+	# Qt5::QGtk3ThemePlugin
+	#
+	if (TARGET Qt5::QGtk3ThemePlugin)
+
+		target_link_libraries(Qt5::QGtk3ThemePlugin
+			INTERFACE
+				# System libs
+				gtk-3
+				gdk-3
+				pango-1.0
+				gobject-2.0
 		)
 
 	endif ()
