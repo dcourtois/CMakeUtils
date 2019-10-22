@@ -275,22 +275,28 @@ if (QT_STATIC)
 endif ()
 
 #
-# When not linking against a static Qt library, we need to use a tool to package all dlls, QML modules,
-# etc. used by an executable, so that we can distribute it and launch it on a system where Qt is not
-# installed and on the PATH.
+# Usage: install_qt_target TARGET QML_DIR <...>)
 #
-# The qt_install function does just that.
+# This does 2 things: First, invoke the usual `install` CMake command.
+# Then it will invoke the `windeployqt` helper tool to gather every dll, qml script,
+# plugin, etc. that is needed to have a standalone target.
 #
-if (WIN32 AND NOT QT_STATIC)
+# The deploy step will only happen when linking against a dynamic Qt library,
+# and on Windows (for the moment)
+#
+# TARGET  : Name of the target to install
+# QML_DIR : Root QML folder. This is passed to the deploy helper as --qmldir
+# <...>   : The rest of the arguments are forwarded to `install`
+#
+function (install_qt_target TARGET QMLDIR)
 
-	function (qt_install TARGET QMLDIR)
+	# Install the target at the root of the install prefix
+	install (TARGETS ${TARGET}
+		${ARGN}
+	)
 
-		# Install the target at the root of the install prefix
-		install (TARGETS ${TARGET}
-			RUNTIME DESTINATION .
-			LIBRARY DESTINATION .
-			ARCHIVE DESTINATION .
-		)
+	# Windows + shared Qt : deploy
+	if (WIN32 AND NOT QT_STATIC)
 
 		# find the windeployqt utility
 		find_program (QT_DEPLOY_TOOL
@@ -314,6 +320,6 @@ if (WIN32 AND NOT QT_STATIC)
 			)
 		")
 
-	endfunction ()
+	endif ()
 
-endif ()
+endfunction ()
