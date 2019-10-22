@@ -306,9 +306,17 @@ function (install_qt_target TARGET QMLDIR)
 				${QT_DIR}/../../bin
 		)
 
+		# error check
+		if (NOT QT_DEPLOY_TOOL)
+			message (WARNING "Couldn't find windeployqt tool in ${QT_DIR} - Deployment will not work.")
+			return ()
+		endif ()
+
 		# and execute the command
 		install (CODE "
-			execute_process(
+			message (STATUS \"Deploying ${TARGET}\")
+
+			execute_process (
 				COMMAND ${QT_DEPLOY_TOOL} --qmldir \"${QMLDIR}\" \"${CMAKE_INSTALL_PREFIX}/${TARGET}${CMAKE_EXECUTABLE_SUFFIX}\"
 					--no-compiler-runtime
 					--no-opengl-sw
@@ -317,7 +325,16 @@ function (install_qt_target TARGET QMLDIR)
 					--no-translations
 					--no-qmltooling
 				WORKING_DIRECTORY ${QT_DIR}/bin
+				RESULT_VARIABLE QT_DEPLOY_RESULT
+				ERROR_VARIABLE QT_DEPLOY_OUTPUT
+				OUTPUT_VARIABLE QT_DEPLOY_OUTPUT
 			)
+
+			if (NOT \${QT_DEPLOY_RESULT} EQUAL 0)
+				message (WARNING \"Deployment failed with code \${QT_DEPLOY_RESULT}\${QT_DEPLOY_OUTPUT}\")
+			else ()
+				message (STATUS \"Deployment done\")
+			endif ()
 		")
 
 	endif ()
