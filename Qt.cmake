@@ -272,6 +272,20 @@ if (QT_STATIC)
 
 	endif ()
 
+	#
+	# Qt5::Svg
+	#
+	if (TARGET Qt5::Svg)
+
+		target_link_libraries(Qt5::Svg
+			INTERFACE
+				# Qt targets
+				$<$<PLATFORM_ID:Windows>:Qt5::QSvgIconPlugin>
+				$<$<PLATFORM_ID:Linux>:Qt5::QSvgPlugin>
+		)
+
+	endif ()
+
 endif ()
 
 #
