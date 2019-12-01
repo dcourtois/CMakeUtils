@@ -289,7 +289,7 @@ if (QT_STATIC)
 endif ()
 
 #
-# Usage: install_qt_target TARGET QML_DIR <...>)
+# Usage: install_qt_target (TARGET QMLDIR <...>)
 #
 # This does 2 things: First, invoke the usual `install` CMake command.
 # Then it will invoke the `windeployqt` helper tool to gather every dll, qml script,
@@ -299,8 +299,8 @@ endif ()
 # and on Windows (for the moment)
 #
 # TARGET  : Name of the target to install
-# QML_DIR : Root QML folder. This is passed to the deploy helper as --qmldir
-# <...>   : The rest of the arguments are forwarded to `install`
+# QMLDIR  : Root QML folder. This is passed to the deploy helper as --qmldir
+# <...>   : The rest of the arguments are forwarded to the normal CMake `install` command
 #
 function (install_qt_target TARGET QMLDIR)
 
