@@ -13,27 +13,41 @@
 # include ("./CMakeUtils/Qt.cmake")
 # ```
 #
-# You just have to make `QT_ROOT` point at the folder where the CMake exported targets
-# are located. Usually located in `lib/cmake` in your Qt root folder.
-#
 # Here is more detailed explanation of the variables available to configure the script:
 #
-# QT_ROOT       : Can be either the folder where the CMake exported targets are located,
-#                 or a list of such folders. This is passed to `find_package` as `HINTS`.
-# QT_SUFFIX     : When used, it's passed to `find_package` as `PATH_SUFFIXES`. It can be
-#                 either a single string or a list.
-# QT_VERSION    : Optional version number. If omitted, uses `5`.
-# QT_COMPONENTS : The components you want to load.
+# QT_ROOT
+#       Can be either the folder where the CMake exported targets are located,
+#       or a list of such folders. This is passed to `find_package` as `HINTS`,
+#       optionally combined with the versions set in QT_VERSIONS.
+#
+# QT_VERSIONS
+#       Optional list of version strings. If this is set, the script will iterate
+#       on all the paths in QT_ROOT, and will combine each one with each version
+#       string set in QT_VERSIONS. The resulting strings are passed as `HINTS` to
+#       find_package.
+#
+# QT_SUFFIX
+#       When used, it's passed to `find_package` as `PATH_SUFFIXES`. It can be
+#       either a single string or a list.
+#
+# QT_MIN_VERSION
+#       Optional minimum version number. If omitted, defaults to `5`.
+#
+# QT_COMPONENTS
+#       The components you want to load.
 #
 # A more complete example, if you're working on a multiplatform project:
 #
 # ```
 # # The paths on your various platforms or build machines:
 # set (QT_ROOT
-#     "C:/Qt/5.13.1"
-#     "D:/Qt/5.13.1"
-#     "/usr/localQt/5.13.1"
+#     "C:/Qt"
+#     "D:/Qt"
+#     "/usr/localQt"
 # )
+#
+# # The various versions you support, from the most recent to the oldest
+# set (QT_VERSIONS "5.13.2" "5.13.1" "5.13.0")
 #
 # # The suffixes (those are kinda standard when installing Qt from the online installer)
 # set (QT_SUFFIX
@@ -41,10 +55,27 @@
 #     "gcc_64/lib/cmake"
 #     "clang_64/lib/cmake"
 # )
+#
+# # Minimum version and components to use
+# set (QT_MIN_VERSION 5.13)
 # set (QT_COMPONENTS Widgets)
+#
+# # And finally include this script
 # include ("./CMakeUtils/Qt.cmake")
 # ```
 #
+
+#
+# If we have some versions, combine them to the roots
+#
+if (DEFINED QT_VERSIONS)
+	set (ROOTS ${QT_ROOT})
+	foreach (ROOT IN ITEMS ${ROOTS})
+		foreach (VERSION IN ITEMS ${QT_VERSIONS})
+			list (APPEND QT_ROOT "${ROOT}/${VERSION}")
+		endforeach ()
+	endforeach ()
+endif ()
 
 #
 # Find Qt.
@@ -60,7 +91,7 @@ find_path (QT_DIR Qt5
 # Log / Error
 #
 if (NOT QT_DIR)
-	message (FATAL_ERROR "Couldn't find Qt. Use QT_ROOT variable to point to a valid Qt install.")
+	message (FATAL_ERROR "Couldn't find Qt. Use QT_ROOT variable to point to a valid Qt install. ${QT_ROOT}")
 else ()
 	message (STATUS "Found Qt in '${QT_DIR}'")
 endif ()
@@ -68,11 +99,11 @@ endif ()
 #
 # Find our Qt components
 #
-if (NOT QT_VERSION)
-	set (QT_VERSION 5)
+if (NOT QT_MIN_VERSION)
+	set (QT_MIN_VERSION 5)
 endif ()
 set (CMAKE_PREFIX_PATH ${QT_DIR})
-find_package (Qt5 ${QT_VERSION} COMPONENTS ${QT_COMPONENTS} REQUIRED)
+find_package (Qt5 ${QT_MIN_VERSION} COMPONENTS ${QT_COMPONENTS} REQUIRED)
 
 #
 # Check if Qt is a shared or static library
