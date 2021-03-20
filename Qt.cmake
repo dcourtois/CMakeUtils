@@ -78,9 +78,20 @@ if (DEFINED QT_VERSIONS)
 endif ()
 
 #
+# Check the version requirement, and handle the Qt major numbers.
+#
+if (NOT QT_MIN_VERSION)
+	# default to 5
+	set (QT_MIN_VERSION 5)
+endif ()
+set (CMAKE_PREFIX_PATH ${QT_DIR})
+string (SUBSTRING "${QT_MIN_VERSION}" 0 1 QT_MAJOR)
+set (QT "Qt${QT_MAJOR}")
+
+#
 # Find Qt.
 #
-find_path (QT_DIR Qt5
+find_path (QT_DIR ${QT}
 	HINTS
 		${QT_ROOT}
 	PATH_SUFFIXES
@@ -91,7 +102,7 @@ find_path (QT_DIR Qt5
 # Log / Error
 #
 if (NOT QT_DIR)
-	message (FATAL_ERROR "Couldn't find Qt. Use QT_ROOT variable to point to a valid Qt install. ${QT_ROOT}")
+	message (FATAL_ERROR "Couldn't find ${QT}. Root: ${QT_ROOT} Suffixes: ${QT_SUFFIX}")
 else ()
 	message (STATUS "Found Qt in '${QT_DIR}'")
 endif ()
@@ -99,16 +110,13 @@ endif ()
 #
 # Find our Qt components
 #
-if (NOT QT_MIN_VERSION)
-	set (QT_MIN_VERSION 5)
-endif ()
 set (CMAKE_PREFIX_PATH ${QT_DIR})
-find_package (Qt5 ${QT_MIN_VERSION} COMPONENTS ${QT_COMPONENTS} REQUIRED)
+find_package (${QT} ${QT_MIN_VERSION} COMPONENTS ${QT_COMPONENTS} REQUIRED)
 
 #
 # Check if Qt is a shared or static library
 #
-get_target_property (QT_CORE_TARGET_TYPE Qt5::Core TYPE)
+get_target_property (QT_CORE_TARGET_TYPE ${QT}::Core TYPE)
 if (QT_CORE_TARGET_TYPE STREQUAL STATIC_LIBRARY)
 	set (QT_STATIC ON)
 	message (STATUS "Using a static Qt library, patching exported targets...")
@@ -118,9 +126,13 @@ endif ()
 
 #
 # When using static build, exported Qt targets miss a awefull lot of dependencies (on Windows
-# at least, didn't check the other platforms) so to avoid bothering, patch Qt5::Widgets
+# at least, didn't check the other platforms) so to avoid bothering, patch ${QT}::Widgets
 #
-if (QT_STATIC)
+# Note that Qt6 doesn't need all this anymore! It seems to directly add the required plugin
+# sources to your project, so you no longer need to do anything special CMake side or code side
+# to use a static Qt version.
+#
+if (QT_STATIC AND QT_MAJOR STREQUAL "5")
 
 	#
 	# Set a few paths
